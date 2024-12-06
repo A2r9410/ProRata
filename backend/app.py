@@ -57,12 +57,11 @@ def register():
 
     # Validar que los datos estén completos
     if not name or not email or not password:
-        return jsonify({"error": "Faltan datos"}), 400
+        return jsonify({"error": "Faltan datos: asegúrate de proporcionar nombre de usuario, email y contraseña"}), 400
 
     # Verificar si el nombre de usuario o email ya está registrado
     if db.users.find_one({"$or": [{"email": email}, {"name": name}]}):
         return jsonify({"error": "El email o el nombre de usuario ya están registrados"}), 400
-
 
     # Encriptar la contraseña
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -77,8 +76,6 @@ def register():
     db.users.insert_one(user)
 
     return jsonify({"message": "Usuario registrado exitosamente"}), 201
-
-
 
 # Clave secreta para firmar los tokens (¡cámbiala por algo más seguro en producción!)
 SECRET_KEY = "supersecretkey"
@@ -204,6 +201,10 @@ def funds():
     # Obtener los nombres de los usuarios
     users = {user["_id"]: user["name"] for user in db.users.find({}, {"_id": 1, "name": 1})}
     return render_template("funds.html", funds=funds_list, users=users)
+
+@app.route("/register")
+def register_page():
+    return render_template("register.html")
 
 
 if __name__ == "__main__":
