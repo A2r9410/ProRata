@@ -49,15 +49,19 @@ def test_db():
 def register():
     db = mongo.db
 
-    # Obtener datos del cliente
-    data = request.json
+    # Obtener datos del formulario o JSON
+    if request.is_json:  # Si el contenido es JSON
+        data = request.json
+    else:  # Si el contenido proviene de un formulario HTML
+        data = request.form
+
     name = data.get("name")
     email = data.get("email")
     password = data.get("password")
 
     # Validar que los datos estén completos
     if not name or not email or not password:
-        return jsonify({"error": "Faltan datos: asegúrate de proporcionar nombre de usuario, email y contraseña"}), 400
+        return jsonify({"error": "Faltan datos"}), 400
 
     # Verificar si el nombre de usuario o email ya está registrado
     if db.users.find_one({"$or": [{"email": email}, {"name": name}]}):
@@ -75,7 +79,9 @@ def register():
     }
     db.users.insert_one(user)
 
+    # Mensaje de éxito
     return jsonify({"message": "Usuario registrado exitosamente"}), 201
+
 
 # Clave secreta para firmar los tokens (¡cámbiala por algo más seguro en producción!)
 SECRET_KEY = "supersecretkey"
