@@ -59,9 +59,10 @@ def register():
     if not name or not email or not password:
         return jsonify({"error": "Faltan datos"}), 400
 
-    # Verificar si el email ya está registrado
-    if db.users.find_one({"email": email}):
-        return jsonify({"error": "El email ya está registrado"}), 400
+    # Verificar si el nombre de usuario o email ya está registrado
+    if db.users.find_one({"$or": [{"email": email}, {"name": name}]}):
+        return jsonify({"error": "El email o el nombre de usuario ya están registrados"}), 400
+
 
     # Encriptar la contraseña
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -88,15 +89,21 @@ def login():
 
     # Obtener datos del cliente
     data = request.json
-    email = data.get("email")
+    identifier = data.get("identifier")  # Puede ser email o username
     password = data.get("password")
 
     # Validar que los datos estén completos
-    if not email or not password:
+    if not identifier or not password:
         return jsonify({"error": "Faltan datos"}), 400
 
-    # Buscar al usuario en la base de datos
-    user = db.users.find_one({"email": email})
+    # Buscar al usuario por correo o nombre de usuario
+    user = db.users.find_one({
+        "$or": [
+            {"email": identifier},
+            {"name": identifier}
+        ]
+    })
+
     if not user:
         return jsonify({"error": "El usuario no existe"}), 404
 
@@ -109,7 +116,7 @@ def login():
         {
             "user_id": str(user["_id"]),
             "email": user["email"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Expira en 24 horas
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
         },
         SECRET_KEY,
         algorithm="HS256"
