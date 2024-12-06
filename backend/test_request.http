@@ -1,4 +1,4 @@
-### Registrar un Usuario
+### Registrar un Usuario#####
 POST http://localhost:5000/users/register
 Content-Type: application/json
 
