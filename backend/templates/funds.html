@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Fondos Registrados{% endblock %}
+
+{% block content %}
+<h1>Fondos Registrados</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Monto</th>
+            <th>Mes</th>
+            <th>Fecha de Registro</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for fund in funds %}
+        <tr>
+            <td>{{ users[fund.user_id] }}</td>
+            <td>{{ fund.amount }}</td>
+            <td>{{ fund.month }}</td>
+            <td>{{ fund.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

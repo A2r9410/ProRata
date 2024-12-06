@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Fondo Mensual{% endblock %}
+
+{% block content %}
+<h1>Registrar Fondo Mensual</h1>
+<form method="POST" action="{{ url_for('register_fund') }}">
+    <div class="mb-3">
+        <label for="user_id" class="form-label">Usuario</label>
+        <select class="form-select" id="user_id" name="user_id" required>
+            <option value="">Seleccione un usuario</option>
+            {% for user in users %}
+                <option value="{{ user._id }}">{{ user.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="amount" class="form-label">Monto</label>
+        <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+    </div>
+    <div class="mb-3">
+        <label for="month" class="form-label">Mes</label>
+        <input type="month" class="form-control" id="month" name="month" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Registrar</button>
+</form>
+{% endblock %}
