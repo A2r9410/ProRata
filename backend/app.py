@@ -156,6 +156,48 @@ def groups():
     groups_list = list(db.groups.find({}, {"_id": 0, "name": 1, "members": 1}))  # Solo nombre y miembros
     return render_template("groups.html", groups=groups_list)
 
+@app.route("/funds/register", methods=["GET", "POST"])
+def register_fund():
+    db = mongo.db
+    if request.method == "POST":
+        user_id = request.form.get("user_id")
+        amount = request.form.get("amount")
+        month = request.form.get("month")
+
+        # Validar los datos
+        if not user_id or not amount or not month:
+            return "Todos los campos son obligatorios", 400
+
+        # Convertir el monto a float
+        try:
+            amount = float(amount)
+        except ValueError:
+            return "El monto debe ser un número válido", 400
+
+        # Crear el registro del fondo
+        fund = {
+            "user_id": user_id,
+            "amount": amount,
+            "month": month,
+            "created_at": datetime.datetime.utcnow(),
+        }
+
+        # Guardar en la base de datos
+        db.funds.insert_one(fund)
+        return redirect(url_for("funds"))
+
+    # Obtener la lista de usuarios para el formulario
+    users = list(db.users.find({}, {"_id": 1, "name": 1}))
+    return render_template("register_fund.html", users=users)
+
+@app.route("/funds")
+def funds():
+    db = mongo.db
+    funds_list = list(db.funds.find())
+    # Obtener los nombres de los usuarios
+    users = {user["_id"]: user["name"] for user in db.users.find({}, {"_id": 1, "name": 1})}
+    return render_template("funds.html", funds=funds_list, users=users)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
