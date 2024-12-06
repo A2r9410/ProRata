@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Grupos - ProRata{% endblock %}
+
+{% block content %}
+<h1>Grupos</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre del Grupo</th>
+            <th>Miembros</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in groups %}
+        <tr>
+            <td>{{ group.name }}</td>
+            <td>{{ group.members | join(", ") }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

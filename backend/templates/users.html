@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios - ProRata{% endblock %}
+
+{% block content %}
+<h1>Usuarios Registrados</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

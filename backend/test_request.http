@@ -21,7 +21,7 @@ Content-Type: application/json
 ### Crear un Grupo
 POST http://localhost:5000/groups/create
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc1MzBlN2QxYTk2NGU2N2JjODk1NmQ5IiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSIsImV4cCI6MTczMzYwMDExM30.Y47ggDiga1VEmpTakfCyBoW4GxmUfvCl3DnGVDwFM9k
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjc1MzBlN2QxYTk2NGU2N2JjODk1NmQ5IiwiZW1haWwiOiJqb2huLmRvZUBleGFtcGxlLmNvbSIsImV4cCI6MTczMzYwMDQ5NH0.-E3xT_onpB-hTteFjz41NyiWjyhl3zYa8y0OZA9JUk4
 
 {
   "name": "Viaje con Amigos",

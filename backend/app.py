@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from functools import wraps
+from flask import render_template
 import datetime
 import jwt
 
@@ -76,8 +77,7 @@ def register():
 
     return jsonify({"message": "Usuario registrado exitosamente"}), 201
 
-import jwt
-import datetime
+
 
 # Clave secreta para firmar los tokens (¡cámbiala por algo más seguro en producción!)
 SECRET_KEY = "supersecretkey"
@@ -143,6 +143,18 @@ def create_group(current_user):
     group_id = db.groups.insert_one(group).inserted_id
 
     return jsonify({"message": "Grupo creado exitosamente", "group_id": str(group_id)}), 201
+
+@app.route("/users")
+def users():
+    db = mongo.db
+    users_list = list(db.users.find({}, {"_id": 0, "name": 1, "email": 1}))  # Solo nombre y email
+    return render_template("users.html", users=users_list)
+
+@app.route("/groups")
+def groups():
+    db = mongo.db
+    groups_list = list(db.groups.find({}, {"_id": 0, "name": 1, "members": 1}))  # Solo nombre y miembros
+    return render_template("groups.html", groups=groups_list)
 
 
 if __name__ == "__main__":
