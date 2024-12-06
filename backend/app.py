@@ -2,6 +2,9 @@ from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from functools import wraps
+import datetime
+import jwt
 
 app = Flask(__name__)
 CORS(app)
@@ -10,6 +13,24 @@ CORS(app)
 app.config["MONGO_URI"] = "mongodb://mongo_container:27017/pro_rata"
 mongo = PyMongo(app)
 bcrypt = Bcrypt(app)
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"error": "Token faltante"}), 401
+
+        try:
+            decoded = jwt.decode(token.split(" ")[1], SECRET_KEY, algorithms=["HS256"])
+            current_user = decoded["user_id"]
+        except:
+            return jsonify({"error": "Token inválido"}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
 
 @app.route("/")
 def home():
@@ -95,6 +116,33 @@ def login():
     )
 
     return jsonify({"token": token}), 200
+
+@app.route("/groups/create", methods=["POST"])
+@token_required
+def create_group(current_user):
+    db = mongo.db
+
+    # Obtener datos del cliente
+    data = request.json
+    group_name = data.get("name")
+    members = data.get("members")
+
+    # Validar los datos
+    if not group_name or not members:
+        return jsonify({"error": "Faltan datos"}), 400
+
+    # Crear el grupo
+    group = {
+        "name": group_name,
+        "members": members,
+        "created_by": current_user,  # ID del usuario que creó el grupo
+        "created_at": datetime.datetime.utcnow(),
+    }
+
+    # Guardar el grupo en la base de datos
+    group_id = db.groups.insert_one(group).inserted_id
+
+    return jsonify({"message": "Grupo creado exitosamente", "group_id": str(group_id)}), 201
 
 
 if __name__ == "__main__":
