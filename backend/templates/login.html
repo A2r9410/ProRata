@@ -1,29 +1,22 @@
-<form id="login-form">
-    <label for="identifier">Nombre de Usuario o Correo:</label>
-    <input type="text" id="identifier" name="identifier" required><br>
-    <label for="password">Contraseña:</label>
-    <input type="password" id="password" name="password" required><br>
-    <button type="button" onclick="loginUser()">Iniciar Sesión</button>
-</form>
-<script>
-    async function loginUser() {
-        const identifier = document.getElementById('identifier').value;
-        const password = document.getElementById('password').value;
+{% extends "base.html" %}
 
-        const response = await fetch('/users/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ identifier, password })
-        });
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Iniciar Sesión</h2>
+    <form method="POST" action="/users/login" class="form-group">
+        {% if error %}
+        <p class="text-danger">{{ error }}</p>
+        {% endif %}
+        
+        <label for="identifier" class="form-label">Nombre de Usuario o Correo Electrónico:</label>
+        <input type="text" id="identifier" name="identifier" class="form-control" required>
+        <br>
 
-        const result = await response.json();
-        if (response.ok) {
-            alert("Inicio de sesión exitoso. Tu token es: " + result.token);
-            localStorage.setItem("authToken", result.token);
-        } else {
-            alert(result.error);
-        }
-    }
-</script>
+        <label for="password" class="form-label">Contraseña:</label>
+        <input type="password" id="password" name="password" class="form-control" required>
+        <br>
+
+        <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+    </form>
+</div>
+{% endblock %}
