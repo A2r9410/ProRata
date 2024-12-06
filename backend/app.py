@@ -90,42 +90,39 @@ SECRET_KEY = "supersecretkey"
 def login():
     db = mongo.db
 
-    # Obtener datos del cliente
-    data = request.json
-    identifier = data.get("identifier")  # Puede ser email o username
-    password = data.get("password")
+    # Detectar si la solicitud proviene de un formulario HTML
+    if request.content_type == "application/json":
+        data = request.json
+        identifier = data.get("identifier")
+        password = data.get("password")
+    elif request.content_type == "application/x-www-form-urlencoded":
+        identifier = request.form["identifier"]
+        password = request.form["password"]
+    else:
+        return jsonify({"error": "Tipo de contenido no soportado"}), 415
 
-    # Validar que los datos estén completos
+    # Validar los datos
     if not identifier or not password:
         return jsonify({"error": "Faltan datos"}), 400
 
-    # Buscar al usuario por correo o nombre de usuario
-    user = db.users.find_one({
-        "$or": [
-            {"email": identifier},
-            {"name": identifier}
-        ]
-    })
-
-    if not user:
-        return jsonify({"error": "El usuario no existe"}), 404
-
-    # Verificar la contraseña
-    if not bcrypt.check_password_hash(user["password"], password):
+    # Buscar al usuario en la base de datos
+    user = db.users.find_one({"$or": [{"email": identifier}, {"name": identifier}]})
+    if not user or not bcrypt.check_password_hash(user["password"], password):
         return jsonify({"error": "Credenciales incorrectas"}), 401
 
-    # Generar el token JWT
+    # Generar token JWT
     token = jwt.encode(
         {
             "user_id": str(user["_id"]),
             "email": user["email"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),  # Expira en 24 horas
         },
         SECRET_KEY,
-        algorithm="HS256"
+        algorithm="HS256",
     )
 
     return jsonify({"token": token}), 200
+
 
 @app.route("/groups/create", methods=["POST"])
 @token_required
@@ -211,6 +208,38 @@ def funds():
 @app.route("/register")
 def register_page():
     return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login_form():
+    if request.method == "POST":
+        identifier = request.form["identifier"]
+        password = request.form["password"]
+
+        # Buscar al usuario en la base de datos
+        user = mongo.db.users.find_one({"$or": [{"email": identifier}, {"name": identifier}]})
+        if not user or not bcrypt.check_password_hash(user["password"], password):
+            # Renderiza el formulario con un mensaje de error si las credenciales son incorrectas
+            return render_template("login.html", error="Credenciales incorrectas")
+
+        # Generar el token JWT
+        token = jwt.encode(
+            {
+                "user_id": str(user["_id"]),
+                "email": user["email"],
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),  # Expira en 24 horas
+            },
+            SECRET_KEY,
+            algorithm="HS256",
+        )
+
+        # Guardar el token en la sesión
+        session["auth_token"] = token
+
+        # Redirigir al dashboard o página protegida
+        return redirect("/dashboard")  # Cambia "/dashboard" por la ruta que prefieras
+
+    # Si es una solicitud GET, renderiza el formulario de login
+    return render_template("login.html")
 
 
 if __name__ == "__main__":
