@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from functools import wraps
+from functools import wraps
 from flask import render_template
 import datetime
 import jwt
@@ -14,6 +15,16 @@ CORS(app)
 app.config["MONGO_URI"] = "mongodb://mongo_container:27017/pro_rata"
 mongo = PyMongo(app)
 bcrypt = Bcrypt(app)
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 def token_required(f):
     @wraps(f)
@@ -37,7 +48,7 @@ def token_required(f):
 def index():
     if "user_id" not in session:
         return redirect("/login")
-    return redirect("/dashboard")  # Cambia esto a la ruta inicial que deseas mostrar tras el login
+    return redirect("/dashboard")  
 
 
 @app.route("/test-db")
