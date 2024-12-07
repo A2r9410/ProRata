@@ -34,8 +34,11 @@ def token_required(f):
 
 
 @app.route("/")
-def home():
-    return jsonify({"message": "¡Bienvenido a ProRata!"})
+def index():
+    if "user_id" not in session:
+        return redirect("/login")
+    return redirect("/dashboard")  # Cambia esto a la ruta inicial que deseas mostrar tras el login
+
 
 @app.route("/test-db")
 def test_db():
